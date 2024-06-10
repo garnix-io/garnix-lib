@@ -23,6 +23,8 @@
       config = lib.mkIf cfg.enable {
         users.users.garnix = {
           description = "A user garnix uses for redeploying";
+          isNormalUser = true;
+          createHome = false;
           openssh.authorizedKeys.keys = [
             "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJTPguYAuqp6qCU43u8g2hgWz4MLCEPPyoVPYO53qB+t garnixServer@garnix.io"
           ];
