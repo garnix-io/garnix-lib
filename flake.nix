@@ -29,6 +29,8 @@
             wheelNeedsPassword = false;
           };
 
+          nix.settings.trusted-users = [ "garnix" ];
+
           users.users.garnix = {
             description = "A user garnix uses for redeploying ${cfg.name}";
             isNormalUser = true;
