@@ -9,21 +9,24 @@
 
     nixosModules.garnix = { lib, config, ... }:
       let
-        cfg = config.garnix.persistence;
+        cfg = config.garnix;
       in
       {
 
-        options.garnix.persistence = {
-          enable = lib.mkEnableOption "Turn this machine into a persistent machine in garnix deploys";
+        options.garnix = {
+          enable = lib.mkEnableOption "Set options required for deploying to garnix";
+          persistence = {
+            enable = lib.mkEnableOption "Turn this machine into a persistent machine in garnix deploys";
 
-          name = lib.mkOption {
-            type = lib.types.str;
-            description = "A unique name to identify this persistent nixos configuration. If a subsequent deploy defines a server with the same persistence name, it'll reuse the same machine, including disks.";
+            name = lib.mkOption {
+              type = lib.types.str;
+              description = "A unique name to identify this persistent nixos configuration. If a subsequent deploy defines a server with the same persistence name, it'll reuse the same machine, including disks.";
+            };
           };
         };
 
         config = lib.mkIf cfg.enable {
-          assertions = [
+          assertions = lib.mkIf cfg.persistence.enable [
             {
               assertion = config.security.sudo.enable;
               message = "garnix.persistence needs security.sudo enabled, but some other module forced the value to 'false'";
@@ -45,18 +48,24 @@
               message = "garnix.persistence needs the user 'garnix' to be present in 'users.users', but some other module forced it out.";
             }
           ];
-          services.openssh.enable = true;
+          fileSystems."/" = {
+            device = "/dev/sda1";
+            fsType = "ext4";
+          };
+          boot.loader.grub.device = "/dev/sda";
 
-          security.sudo = {
+          services.openssh.enable = lib.mkIf cfg.persistence.enable true;
+
+          security.sudo = lib.mkIf cfg.persistence.enable {
             enable = true;
             execWheelOnly = true;
             wheelNeedsPassword = false;
           };
 
-          nix.settings.trusted-users = [ "garnix" ];
+          nix.settings.trusted-users = lib.mkIf cfg.persistence.enable [ "garnix" ];
 
-          users.users.garnix = {
-            description = "A user garnix uses for redeploying ${cfg.name}";
+          users.users.garnix = lib.mkIf cfg.persistence.enable {
+            description = "A user garnix uses for redeploying ${cfg.persistence.name}";
             isNormalUser = true;
             createHome = false;
             openssh.authorizedKeys.keys = [
@@ -78,6 +87,12 @@
         if nixosCfg.config.garnix.persistence.enable
         then nixosCfg.config.garnix.persistence.name + ".persistent.garnix.me"
         else getHash nixosCfg;
+
+    lib = {
+      getHashSubdomain = nixosCfg :
+        let prefixLength = nixpkgs.lib.stringLength "/nix/store/";
+            hash = builtins.substring prefixLength 32 nixosCfg.config.system.build.toplevel.drvPath;
+        in hash + ".hash.garnix.me";
     };
   };
 }
