@@ -8,19 +8,43 @@
   outputs = { self, nixpkgs }: {
 
     nixosModules.garnix = { lib, config, ... }:
-      let cfg = config.garnix.persistence;
-      in {
+      let
+        cfg = config.garnix.persistence;
+      in
+      {
 
         options.garnix.persistence = {
           enable = lib.mkEnableOption "Enable persistence in garnix deploys";
 
           name = lib.mkOption {
             type = lib.types.str;
-            description = "A unique name to identify this persistence.";
+            description = "A unique name to identify this persistent nixos configuration. If a subsequent deploy defines a server with the same persistence name, it'll reuse the same machine, including disks.";
           };
         };
 
         config = lib.mkIf cfg.enable {
+          assertions = [
+            {
+              assertion = config.security.sudo.enable;
+              message = "garnix.persistence needs security.sudo enabled, but some other module forced the value to 'false'";
+            }
+            {
+              assertion = config.security.sudo.execWheelOnly;
+              message = "garnix.persistence needs security.sudo.execWheelOnly enabled, but some other module forced the value to 'false'";
+            }
+            {
+              assertion = !config.security.sudo.wheelNeedsPassword;
+              message = "garnix.persistence needs security.sudo.wheelNeedsPassword disabled, but some other module forced the value to 'true'";
+            }
+            {
+              assertion = lib.elem "garnix" config.nix.settings.trusted-users;
+              message = "garnix.persistence needs the user 'garnix' to be present in 'nix.settings.trusted-users', but some other module forced it out.";
+            }
+            {
+              assertion = lib.elem "garnix" (lib.attrNames config.users.users);
+              message = "garnix.persistence needs the user 'garnix' to be present in 'users.users', but some other module forced it out.";
+            }
+          ];
           services.openssh.enable = true;
 
           security.sudo = {
