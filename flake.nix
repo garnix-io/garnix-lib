@@ -14,7 +14,7 @@
       {
 
         options.garnix.persistence = {
-          enable = lib.mkEnableOption "Enable persistence in garnix deploys";
+          enable = lib.mkEnableOption "Turn this machine into a persistent machine in garnix deploys";
 
           name = lib.mkOption {
             type = lib.types.str;
