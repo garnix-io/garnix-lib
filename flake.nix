@@ -87,12 +87,8 @@
         if nixosCfg.config.garnix.persistence.enable
         then nixosCfg.config.garnix.persistence.name + ".persistent.garnix.me"
         else getHash nixosCfg;
-
-    lib = {
-      getHashSubdomain = nixosCfg :
-        let prefixLength = nixpkgs.lib.stringLength "/nix/store/";
-            hash = builtins.substring prefixLength 32 nixosCfg.config.system.build.toplevel.drvPath;
-        in hash + ".hash.garnix.me";
     };
+
+    checks.x86_64-linux.main = nixpkgs.legacyPackages.x86_64-linux.haskellPackages.callCabal2nix "tests" ./tests {};
   };
 }

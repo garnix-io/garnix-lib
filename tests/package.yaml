@@ -1,0 +1,25 @@
+name: garnix-lib-tests
+version: 0.0.0.0
+synopsis: Tests
+author: garnix team <dev@garnix.io>
+maintainer: garnix team <dev@garnix.io>
+github: garnix-io/garnix-lib
+category: System
+
+dependencies:
+  - base >= 4.5 && < 5
+  - string-conversions
+  - text
+  - temporary
+  - hspec
+
+ghc-options:
+  - -Wall
+  - -Wno-name-shadowing
+  - -threaded
+
+tests:
+  spec:
+    main: Main.hs
+    ghc-options:
+      - -fdefer-typed-holes
