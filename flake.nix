@@ -7,7 +7,7 @@
 
   outputs = { self, nixpkgs }: {
 
-    nixosModules.garnix = { lib, config, ... }:
+    nixosModules.default = { lib, config, ... }:
       let
         cfg = config.garnix.persistence;
       in
@@ -45,6 +45,14 @@
               message = "garnix.persistence needs the user 'garnix' to be present in 'users.users', but some other module forced it out.";
             }
           ];
+
+
+          fileSystems."/" = {
+            device = "/dev/sda1";
+            fsType = "ext4";
+          };
+          boot.loader.grub.device = "/dev/sda";
+
           services.openssh.enable = true;
 
           security.sudo = {
