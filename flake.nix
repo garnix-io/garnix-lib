@@ -7,7 +7,7 @@
 
   outputs = { self, nixpkgs }: {
 
-    nixosModules.default = { lib, config, ... }:
+    nixosModules.garnix = { lib, config, ... }:
       let
         cfg = config.garnix.server;
       in
@@ -39,8 +39,8 @@
                 message = "garnix.server needs the fileSystems.\"/\".fsType to be \"ext4\"";
               }
               {
-                assertion = config.boot.loader.grub.derice == "/dev/sda";
-                message = "garnix.server needs the fileSystems.\"/\".fsType to be \"ext4\"";
+                assertion = config.boot.loader.grub.device == "/dev/sda";
+                message = "garnix.server needs the boot.loader.grub.device to be \"/dev/sda\"";
               }
             ];
 
@@ -51,8 +51,12 @@
             boot.loader.grub.device = "/dev/sda";
           })
 
-          (lib.mkIf (cfg.enable && cfg.persistence.enable) {
+          (lib.mkIf cfg.persistence.enable {
             assertions = [
+              {
+                assertion = config.enable;
+                message = "garnix.server.enable needs to be set to \"true\" for persistence to work.";
+              }
               {
                 assertion = config.security.sudo.enable;
                 message = "garnix.server.persistence needs security.sudo enabled, but some other module forced the value to 'false'";
