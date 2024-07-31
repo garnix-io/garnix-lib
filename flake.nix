@@ -54,8 +54,12 @@
           (lib.mkIf cfg.persistence.enable {
             assertions = [
               {
-                assertion = config.enable;
+                assertion = config.garnix.server.enable;
                 message = "garnix.server.enable needs to be set to \"true\" for persistence to work.";
+              }
+              {
+                assertion = config.garnix.server.persistence.name != "";
+                message = "garnix.server.persistence.name must be non-empty.";
               }
               {
                 assertion = config.security.sudo.enable;
@@ -90,7 +94,7 @@
             nix.settings.trusted-users = [ "garnix" ];
 
             users.users.garnix = {
-              description = "A user garnix uses for redeploying ${cfg.name}";
+              description = "A user garnix uses for redeploying ${cfg.persistence.name}";
               isNormalUser = true;
               createHome = false;
               openssh.authorizedKeys.keys = [
@@ -113,6 +117,18 @@
         if nixosCfg.config.garnix.persistence.enable
         then nixosCfg.config.garnix.persistence.name + ".persistent.garnix.me"
         else getHash nixosCfg;
+    };
+
+    nixosConfigurations.sampleConfig = nixpkgs.lib.nixosSystem {
+      system = "x86_64-linux";
+      modules = [
+        self.nixosModules.garnix
+        {
+          garnix.server.enable = true;
+          garnix.server.persistence.enable = true;
+          garnix.server.persistence.name = "sampleConfig";
+        }
+      ];
     };
   };
 }
