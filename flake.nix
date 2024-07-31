@@ -124,7 +124,7 @@
       modules = [
         self.nixosModules.garnix
         {
-          garnix.server.enable = true;
+          garnix.server.enable = false;
           garnix.server.persistence.enable = true;
           garnix.server.persistence.name = "sampleConfig";
         }
