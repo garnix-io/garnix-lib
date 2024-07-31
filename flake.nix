@@ -119,14 +119,14 @@
         else getHash nixosCfg;
     };
 
-    nixosConfigurations.sampleConfig = nixpkgs.lib.nixosSystem {
+    nixosConfigurations.exampleServer = nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
       modules = [
         self.nixosModules.garnix
         {
           garnix.server.enable = true;
           garnix.server.persistence.enable = true;
-          garnix.server.persistence.name = "sampleConfig";
+          garnix.server.persistence.name = "exampleServer";
         }
       ];
     };

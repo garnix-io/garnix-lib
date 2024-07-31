@@ -9,7 +9,7 @@ Nix helpers for `garnix` users
 
 Gets the domain for a `nixosConfiguration` deployed with garnix (*without* persistence enabled). Use this to communicate between machines.
 
-## nixosModules.default
+## nixosModules.garnix
 
 Type: module
 
