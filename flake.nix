@@ -42,6 +42,14 @@
                 assertion = config.boot.loader.grub.device == "/dev/sda";
                 message = "garnix.server needs the boot.loader.grub.device to be \"/dev/sda\"";
               }
+              {
+                assertion = config.networking.useNetworkd == false;
+                message = "garnix.server needs networking.useNetworkd to be false";
+              }
+              {
+                assertion = config.networking.useDHCP;
+                message = "garnix.server needs networking.useDHCP to be true";
+              }
             ];
 
             fileSystems."/" = {
