@@ -57,8 +57,6 @@
               fsType = "ext4";
             };
             boot.loader.grub.device = "/dev/sda";
-            networking.useNetworkd = false;
-            networking.useDHCP = true;
           })
 
           (lib.mkIf cfg.persistence.enable {
