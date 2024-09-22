@@ -122,8 +122,8 @@
         in
         hash + ".hash.garnix.me";
       getHashSubdomain = nixosCfg:
-        if nixosCfg.config.garnix.persistence.enable
-        then nixosCfg.config.garnix.persistence.name + ".persistent.garnix.me"
+        if nixosCfg.config.garnix.server.persistence.enable
+        then nixosCfg.config.garnix.server.persistence.name + ".persistent.garnix.me"
         else getHash nixosCfg;
     };
 
