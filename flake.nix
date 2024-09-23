@@ -39,32 +39,32 @@
             };
             assertions = [
               {
-                assertion = config.isVM || config.fileSystems."/".device == "/dev/sda1";
+                assertion = cfg.isVM || config.fileSystems."/".device == "/dev/sda1";
                 message = "garnix.server needs the fileSystems.\"/\".device to be \"/dev/sda1\"";
               }
               {
-                assertion = config.isVM || config.fileSystems."/".fsType == "ext4";
+                assertion = cfg.isVM || config.fileSystems."/".fsType == "ext4";
                 message = "garnix.server needs the fileSystems.\"/\".fsType to be \"ext4\"";
               }
               {
-                assertion = config.isVM || config.boot.loader.grub.device == "/dev/sda";
+                assertion = cfg.isVM || config.boot.loader.grub.device == "/dev/sda";
                 message = "garnix.server needs the boot.loader.grub.device to be \"/dev/sda\"";
               }
               {
-                assertion = config.isVM || config.networking.useNetworkd == false;
+                assertion = cfg.isVM || config.networking.useNetworkd == false;
                 message = "garnix.server needs networking.useNetworkd to be false";
               }
               {
-                assertion = config.isVM || config.networking.useDHCP;
+                assertion = cfg.isVM || config.networking.useDHCP;
                 message = "garnix.server needs networking.useDHCP to be true";
               }
             ];
 
-            fileSystems."/" = lib.mkIf (!config.isVM) {
+            fileSystems."/" = lib.mkIf (!cfg.isVM) {
               device = "/dev/sda1";
               fsType = "ext4";
             };
-            boot.loader.grub.device = lib.mkIf (!config.isVM) "/dev/sda";
+            boot.loader.grub.device = lib.mkIf (!cfg.isVM) "/dev/sda";
           })
 
           (lib.mkIf cfg.persistence.enable {
