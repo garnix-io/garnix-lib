@@ -7,7 +7,7 @@
 
   outputs = { self, nixpkgs }: {
 
-    nixosModules.garnix = { lib, config, ... }:
+    nixosModules.garnix = { lib, config, modulesPath, ... }:
       let
         cfg = config.garnix.server;
       in
@@ -31,6 +31,8 @@
             };
           };
         };
+
+        imports = [ (modulesPath + "/profiles/qemu-guest.nix") ];
 
         config = lib.mkMerge [
           (lib.mkIf cfg.enable {
