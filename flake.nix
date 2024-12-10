@@ -5,7 +5,7 @@
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
   };
 
-  outputs = { self, nixpkgs }: {
+  outputs = flakeInputs@{ self, nixpkgs, ... }: {
 
     nixosModules.garnix = { lib, config, modulesPath, ... }:
       let
@@ -135,6 +135,8 @@
         if nixosCfg.config.garnix.server.persistence.enable
         then nixosCfg.config.garnix.server.persistence.name + ".persistent.garnix.me"
         else getHash nixosCfg;
+
+      mkModules = import ./mk-modules.nix flakeInputs;
     };
 
     nixosConfigurations.exampleServer = nixpkgs.lib.nixosSystem {
