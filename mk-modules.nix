@@ -39,14 +39,12 @@
   evalModules = system: lib.evalModules {
     specialArgs = {
       pkgs = import flakeInputs.nixpkgs { inherit system; };
+      inherit system;
     };
     modules = [
       flakeSchema
-      {
-        imports = mkModulesOpts.modules or [];
-        config = mkModulesOpts.config or {};
-      }
-    ];
+      (mkModulesOpts.config or {})
+    ] ++ (mkModulesOpts.modules or []);
   };
 
   evaledModulesForSystem = builtins.listToAttrs (map (system: { name = system; value = evalModules system; }) systems);
