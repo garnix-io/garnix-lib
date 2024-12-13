@@ -1,4 +1,4 @@
-{ flakeInputs, mkModulesOpts }: let
+flakeInputs: mkModulesOpts: let
   lib = flakeInputs.nixpkgs.lib;
 
   systems = mkModulesOpts.systems or [
@@ -8,7 +8,7 @@
     "x86_64-linux"
   ];
 
-  flakeSchema.options = {
+  flakeSchemaModule.options = {
     apps = lib.mkOption {
       type = lib.types.attrsOf lib.types.str;
       default = {};
@@ -42,26 +42,28 @@
       inherit system;
     };
     modules = [
-      flakeSchema
+      flakeSchemaModule
       (mkModulesOpts.config or {})
     ] ++ (mkModulesOpts.modules or []);
   };
 
   evaledModulesForSystem = builtins.listToAttrs (map (system: { name = system; value = evalModules system; }) systems);
 in {
-  apps = builtins.mapAttrs (_: e:
-    builtins.mapAttrs (_: program: { type = "app"; inherit program; }) e.config.apps
+  apps = builtins.mapAttrs (_: evaled:
+    builtins.mapAttrs (_: program: { type = "app"; inherit program; }) evaled.config.apps
   ) evaledModulesForSystem;
 
-  packages = builtins.mapAttrs (_: e: e.config.packages) evaledModulesForSystem;
+  packages = builtins.mapAttrs (_: evaled: evaled.config.packages) evaledModulesForSystem;
 
-  checks = builtins.mapAttrs (_: e: e.config.checks) evaledModulesForSystem;
+  checks = builtins.mapAttrs (_: evaled: evaled.config.checks) evaledModulesForSystem;
 
-  devShells = builtins.mapAttrs (_: e: e.config.devShells // {
+  devShells = builtins.mapAttrs (_: evaled: evaled.config.devShells // {
     # combine all defined devshells into a single "default" devshell
-    default = e._module.specialArgs.pkgs.mkShell {
-      inputsFrom = builtins.attrValues e.config.devShells;
-    };
+    default =
+      let pkgs = evaled._module.specialArgs.pkgs;
+      in pkgs.mkShell {
+        inputsFrom = builtins.attrValues evaled.config.devShells;
+      };
   }) evaledModulesForSystem;
 
   nixosConfigurations = builtins.mapAttrs (name: nixosConfig: lib.nixosSystem {

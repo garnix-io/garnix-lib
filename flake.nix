@@ -136,7 +136,7 @@
         then nixosCfg.config.garnix.server.persistence.name + ".persistent.garnix.me"
         else getHash nixosCfg;
 
-      mkModules = mkModulesOpts: import ./mk-modules.nix { inherit flakeInputs mkModulesOpts; };
+      mkModules = import ./mk-modules.nix flakeInputs;
     };
 
     nixosConfigurations.exampleServer = nixpkgs.lib.nixosSystem {
