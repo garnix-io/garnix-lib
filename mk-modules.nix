@@ -34,6 +34,13 @@ flakeInputs: mkModulesOpts: let
       type = lib.types.attrsOf lib.types.unspecified;
       default = {};
     };
+
+    garnix.config.servers = lib.mkOption {
+      # This type is checked by garnix CI on push
+      # See https://garnix.io/docs/yaml_config for documentation
+      type = lib.types.listOf lib.types.unspecified;
+      default = [];
+    };
   };
 
   evalModules = system: lib.evalModules {
@@ -85,4 +92,6 @@ in {
       }
     ];
   }) evaledModulesForSystem.x86_64-linux.config.nixosConfigurations;
+
+  garnix.config = evaledModulesForSystem.x86_64-linux.config.garnix.config;
 }
