@@ -35,11 +35,18 @@ flakeInputs: mkModulesOpts: let
       default = {};
     };
 
-    garnix.config.servers = lib.mkOption {
-      # This type is checked by garnix CI on push
-      # See https://garnix.io/docs/yaml_config for documentation
-      type = lib.types.listOf lib.types.unspecified;
-      default = [];
+    garnix = {
+      deployBranch = lib.mkOption {
+        type = lib.types.str;
+        description = "The branch that garnix will automatically deploy servers from on push";
+      };
+
+      config.servers = lib.mkOption {
+        # This type is checked by garnix CI on push
+        # See https://garnix.io/docs/yaml_config for documentation
+        type = lib.types.listOf lib.types.unspecified;
+        default = [];
+      };
     };
   };
 
@@ -93,5 +100,14 @@ in {
     ];
   }) evaledModulesForSystem.x86_64-linux.config.nixosConfigurations;
 
-  garnix.config = evaledModulesForSystem.x86_64-linux.config.garnix.config;
+  garnix.config.servers = let
+    config = evaledModulesForSystem.x86_64-linux.config;
+  in
+    map (nixosConfigName: {
+      configuration = nixosConfigName;
+      deployment = {
+        type = "on-branch";
+        branch = config.garnix.deployBranch;
+      };
+    }) (builtins.attrNames config.nixosConfigurations);
 }
