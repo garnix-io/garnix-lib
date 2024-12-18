@@ -31,7 +31,7 @@ flakeInputs: mkModulesOpts: let
 
     nixosConfigurations = lib.mkOption {
       # This type will be checked by lib.nixosSystem below
-      type = lib.types.attrsOf lib.types.unspecified;
+      type = lib.types.attrsOf (lib.types.listOf lib.types.unspecified);
       default = {};
     };
 
@@ -80,10 +80,9 @@ in {
       };
   }) evaledModulesForSystem;
 
-  nixosConfigurations = builtins.mapAttrs (name: nixosConfig: lib.nixosSystem {
+  nixosConfigurations = builtins.mapAttrs (name: nixosModules: lib.nixosSystem {
     modules = [
       flakeInputs.self.nixosModules.garnix
-      nixosConfig
       {
         # This sets up networking and filesystems in a way that works with garnix hosting.
         garnix.server.enable = true;
@@ -97,7 +96,7 @@ in {
           users.users.root.password = "";
         };
       }
-    ];
+    ] ++ nixosModules;
   }) evaledModulesForSystem.x86_64-linux.config.nixosConfigurations;
 
   garnix.config.servers = let
