@@ -2,7 +2,7 @@
   description = "Nix helpers for garnix users";
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.11";
   };
 
   outputs = flakeInputs@{ self, nixpkgs, ... }: {
