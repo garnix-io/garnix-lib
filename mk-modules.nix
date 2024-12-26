@@ -10,28 +10,28 @@ flakeInputs: mkModulesOpts: let
 
   flakeSchemaModule.options = {
     apps = lib.mkOption {
-      type = lib.types.attrsOf lib.types.str;
+      type = lib.types.lazyAttrsOf lib.types.str;
       default = {};
     };
 
     checks = lib.mkOption {
-      type = lib.types.attrsOf lib.types.package;
+      type = lib.types.lazyAttrsOf lib.types.package;
       default = {};
     };
 
     devShells = lib.mkOption {
-      type = lib.types.attrsOf lib.types.package;
+      type = lib.types.lazyAttrsOf lib.types.package;
       default = {};
     };
 
     packages = lib.mkOption {
-      type = lib.types.attrsOf lib.types.package;
+      type = lib.types.lazyAttrsOf lib.types.package;
       default = {};
     };
 
     nixosConfigurations = lib.mkOption {
       # This type will be checked by lib.nixosSystem below
-      type = lib.types.attrsOf (lib.types.listOf lib.types.unspecified);
+      type = lib.types.lazyAttrsOf (lib.types.listOf lib.types.unspecified);
       default = {};
     };
 
