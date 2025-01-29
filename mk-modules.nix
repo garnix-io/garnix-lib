@@ -111,13 +111,21 @@ in
     let
       config = evaledModulesForSystem.x86_64-linux.config;
     in
-    map
-      (nixosConfigName: {
-        configuration = nixosConfigName;
-        deployment = {
-          type = "on-branch";
-          branch = config.garnix.deployBranch;
-        };
-      })
+    lib.lists.concatMap
+      (nixosConfigName: [
+        {
+          configuration = nixosConfigName;
+          deployment = {
+            type = "on-branch";
+            branch = config.garnix.deployBranch;
+          };
+        }
+        {
+          configuration = nixosConfigName;
+          deployment = {
+            type = "on-pull-request";
+          };
+        }
+      ])
       (builtins.attrNames config.nixosConfigurations);
 }
