@@ -1,4 +1,5 @@
-flakeInputs: mkModulesOpts: let
+flakeInputs: mkModulesOpts:
+let
   lib = flakeInputs.nixpkgs.lib;
 
   systems = mkModulesOpts.systems or [
@@ -11,28 +12,28 @@ flakeInputs: mkModulesOpts: let
   flakeSchemaModule.options = {
     apps = lib.mkOption {
       type = lib.types.lazyAttrsOf lib.types.str;
-      default = {};
+      default = { };
     };
 
     checks = lib.mkOption {
       type = lib.types.lazyAttrsOf lib.types.package;
-      default = {};
+      default = { };
     };
 
     devShells = lib.mkOption {
       type = lib.types.lazyAttrsOf lib.types.package;
-      default = {};
+      default = { };
     };
 
     packages = lib.mkOption {
       type = lib.types.lazyAttrsOf lib.types.package;
-      default = {};
+      default = { };
     };
 
     nixosConfigurations = lib.mkOption {
       # This type will be checked by lib.nixosSystem below
       type = lib.types.lazyAttrsOf (lib.types.listOf lib.types.unspecified);
-      default = {};
+      default = { };
     };
 
     garnix = {
@@ -45,7 +46,7 @@ flakeInputs: mkModulesOpts: let
         # This type is checked by garnix CI on push
         # See https://garnix.io/docs/yaml_config for documentation
         type = lib.types.listOf lib.types.unspecified;
-        default = [];
+        default = [ ];
       };
     };
   };
@@ -57,56 +58,66 @@ flakeInputs: mkModulesOpts: let
     };
     modules = [
       flakeSchemaModule
-      (mkModulesOpts.config or {})
-    ] ++ (mkModulesOpts.modules or []);
+      (mkModulesOpts.config or { })
+    ] ++ (mkModulesOpts.modules or [ ]);
   };
 
   evaledModulesForSystem = builtins.listToAttrs (map (system: { name = system; value = evalModules system; }) systems);
-in {
-  apps = builtins.mapAttrs (_: evaled:
-    builtins.mapAttrs (_: program: { type = "app"; inherit program; }) evaled.config.apps
-  ) evaledModulesForSystem;
+in
+{
+  apps = builtins.mapAttrs
+    (_: evaled:
+      builtins.mapAttrs (_: program: { type = "app"; inherit program; }) evaled.config.apps
+    )
+    evaledModulesForSystem;
 
   packages = builtins.mapAttrs (_: evaled: evaled.config.packages) evaledModulesForSystem;
 
   checks = builtins.mapAttrs (_: evaled: evaled.config.checks) evaledModulesForSystem;
 
-  devShells = builtins.mapAttrs (_: evaled: evaled.config.devShells // {
-    # combine all defined devshells into a single "default" devshell
-    default =
-      let pkgs = evaled._module.specialArgs.pkgs;
-      in pkgs.mkShell {
-        inputsFrom = builtins.attrValues evaled.config.devShells;
-      };
-  }) evaledModulesForSystem;
-
-  nixosConfigurations = builtins.mapAttrs (name: nixosModules: lib.nixosSystem {
-    modules = [
-      flakeInputs.self.nixosModules.garnix
-      {
-        # This sets up networking and filesystems in a way that works with garnix hosting.
-        garnix.server.enable = true;
-
-        # This is currently the only allowed value.
-        nixpkgs.hostPlatform = "x86_64-linux";
-
-        # Settings to improve nixos vm debuggability
-        virtualisation.vmVariant = {
-          virtualisation.graphics = false;
-          users.users.root.password = "";
+  devShells = builtins.mapAttrs
+    (_: evaled: evaled.config.devShells // {
+      # combine all defined devshells into a single "default" devshell
+      default =
+        let pkgs = evaled._module.specialArgs.pkgs;
+        in pkgs.mkShell {
+          inputsFrom = builtins.attrValues evaled.config.devShells;
         };
-      }
-    ] ++ nixosModules;
-  }) evaledModulesForSystem.x86_64-linux.config.nixosConfigurations;
+    })
+    evaledModulesForSystem;
 
-  garnix.config.servers = let
-    config = evaledModulesForSystem.x86_64-linux.config;
-  in
-    map (nixosConfigName: {
-      configuration = nixosConfigName;
-      deployment = {
-        type = "on-branch";
-        branch = config.garnix.deployBranch;
-      };
-    }) (builtins.attrNames config.nixosConfigurations);
+  nixosConfigurations = builtins.mapAttrs
+    (name: nixosModules: lib.nixosSystem {
+      modules = [
+        flakeInputs.self.nixosModules.garnix
+        {
+          # This sets up networking and filesystems in a way that works with garnix hosting.
+          garnix.server.enable = true;
+
+          # This is currently the only allowed value.
+          nixpkgs.hostPlatform = "x86_64-linux";
+
+          # Settings to improve nixos vm debuggability
+          virtualisation.vmVariant = {
+            virtualisation.graphics = false;
+            users.users.root.password = "";
+          };
+        }
+      ] ++ nixosModules;
+    })
+    evaledModulesForSystem.x86_64-linux.config.nixosConfigurations;
+
+  garnix.config.servers =
+    let
+      config = evaledModulesForSystem.x86_64-linux.config;
+    in
+    map
+      (nixosConfigName: {
+        configuration = nixosConfigName;
+        deployment = {
+          type = "on-branch";
+          branch = config.garnix.deployBranch;
+        };
+      })
+      (builtins.attrNames config.nixosConfigurations);
 }
