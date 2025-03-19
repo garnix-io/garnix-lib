@@ -114,7 +114,7 @@
             users.users.garnix = {
               description = "A user garnix uses for redeploying ${cfg.persistence.name}";
               isNormalUser = true;
-              createHome = false;
+              home = "/var/empty";
               openssh.authorizedKeys.keys = [
                 "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJTPguYAuqp6qCU43u8g2hgWz4MLCEPPyoVPYO53qB+t garnixServer@garnix.io"
               ];
