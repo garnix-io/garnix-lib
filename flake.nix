@@ -124,7 +124,9 @@
         ];
       };
 
-    lib = rec {
+    lib = let
+      mkModulesLib = import ./mk-modules.nix flakeInputs;
+    in rec {
       getHash = nixosCfg:
         let
           prefixLength = nixpkgs.lib.stringLength "/nix/store/";
@@ -135,8 +137,8 @@
         if nixosCfg.config.garnix.server.persistence.enable
         then nixosCfg.config.garnix.server.persistence.name + ".persistent.garnix.me"
         else getHash nixosCfg;
-
-      mkModules = import ./mk-modules.nix flakeInputs;
+      mkModules = mkModulesLib.mkModules;
+      evaledModulesForSystems = mkModulesLib.evaledModulesForSystem;
     };
 
     nixosConfigurations.exampleServer = nixpkgs.lib.nixosSystem {
