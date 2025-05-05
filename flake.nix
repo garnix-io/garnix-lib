@@ -117,6 +117,7 @@
               home = "/var/empty";
               openssh.authorizedKeys.keys = [
                 "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJTPguYAuqp6qCU43u8g2hgWz4MLCEPPyoVPYO53qB+t garnixServer@garnix.io"
+                "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHEFyFpvFm4ZxAfES5vvKJGwg6/8HvzmnrJUPRhU+Gpy garnixServer.hosting@garnix.io"
               ];
               extraGroups = [ "wheel" ];
             };
