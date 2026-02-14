@@ -32,7 +32,10 @@
           };
         };
 
-        imports = [ (modulesPath + "/profiles/qemu-guest.nix") ];
+        imports = [
+          (modulesPath + "/profiles/qemu-guest.nix")
+          ./wireguard.nix
+        ];
 
         config = lib.mkMerge [
           (lib.mkIf cfg.enable {
