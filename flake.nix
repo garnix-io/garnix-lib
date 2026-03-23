@@ -52,14 +52,6 @@
                 assertion = cfg.isVM || config.boot.loader.grub.device == "/dev/sda";
                 message = "garnix.server needs the boot.loader.grub.device to be \"/dev/sda\"";
               }
-              {
-                assertion = cfg.isVM || config.networking.useNetworkd == false;
-                message = "garnix.server needs networking.useNetworkd to be false";
-              }
-              {
-                assertion = cfg.isVM || config.networking.useDHCP;
-                message = "garnix.server needs networking.useDHCP to be true";
-              }
             ];
 
             fileSystems."/" = lib.mkIf (!cfg.isVM) {
