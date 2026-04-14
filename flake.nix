@@ -24,6 +24,13 @@
                 description = "A unique name to identify this persistent nixos configuration. If a subsequent deploy defines a server with the same persistence name, it'll reuse the same machine, including disks.";
               };
             };
+
+            dangerouslyAllowSystemdNetworkd = lib.mkEnableOption ''
+              Allow the use of systemd-networkd instead of the default scripted networking.
+              Using systemd-networkd may cause issues with network-online.target among other issues.
+              Only enable this if you know what you are doing and have configured your network manually.
+            '';
+
             isVM = lib.mkOption {
               type = lib.types.bool;
               description = "Whether the machine is a VM. Does not need to be set explicitly.";
@@ -53,12 +60,13 @@
                 message = "garnix.server needs the boot.loader.grub.device to be \"/dev/sda\"";
               }
               {
-                assertion = cfg.isVM || config.networking.useNetworkd == false;
-                message = "garnix.server needs networking.useNetworkd to be false";
-              }
-              {
                 assertion = cfg.isVM || config.networking.useDHCP;
                 message = "garnix.server needs networking.useDHCP to be true";
+              }
+            ] ++ lib.optionals (!cfg.dangerouslyAllowSystemdNetworkd) [
+              {
+                assertion = cfg.isVM || config.networking.useNetworkd == false;
+                message = "garnix.server needs networking.useNetworkd to be false. See garnix.server.dangerouslyAllowSystemdNetworkd.";
               }
             ];
 
